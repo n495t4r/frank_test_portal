@@ -26,8 +26,8 @@ Route::get('/run-migration', function () {
     Artisan::call('optimize:clear');
     Artisan::call('migrate:refresh -seed');
     Artisan::call('custom:create-filament-user', [
-        'name' => 'Francis Onah',
-        'email' => 'onahfa@gmail.com',
+        'name' => 'Admin Super',
+        'email' => 'tcpdecoy@gmail.com',
         'password' => 'admin123',
     ]);
 });

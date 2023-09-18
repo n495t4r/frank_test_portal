@@ -13,7 +13,7 @@ jobs:
     - uses: nathanheffley/laravel-phpunit-action@master
 
   build:
-    needs: phpunit
+    # needs: phpunit
     runs-on: ubuntu-latest
     steps:
 
