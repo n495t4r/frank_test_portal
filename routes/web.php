@@ -24,10 +24,12 @@ Route::get('/test', function () {
 
 Route::get('/run-migration', function () {
     Artisan::call('optimize:clear');
-    Artisan::call('migrate:refresh -seed');
-    Artisan::call('custom:create-filament-user', [
-        'name' => 'Admin Super',
-        'email' => 'tcpdecoy@gmail.com',
-        'password' => 'admin123',
-    ]);
+    Artisan::call('migrate:refresh --seed');
+    // Artisan::call('custom:create-filament-user', [
+    //     'name' => 'Admin Super',
+    //     'email' => 'tcpdecoy@gmail.com',
+    //     'password' => 'admin123',
+    // ]);
+
+    return "Migrations done successfully";
 });
