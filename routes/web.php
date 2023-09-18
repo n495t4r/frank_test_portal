@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,4 +20,14 @@ Route::get('/', function () {
 
 Route::get('/test', function () {
     return view('portal.test');
+});
+
+Route::get('/run-migration', function () {
+    Artisan::call('optimize:clear');
+    Artisan::call('migrate:refresh -seed');
+    Artisan::call('custom:create-filament-user', [
+        'name' => 'Francis Onah',
+        'email' => 'onahfa@gmail.com',
+        'password' => 'admin123',
+    ]);
 });
