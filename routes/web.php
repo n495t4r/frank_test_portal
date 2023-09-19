@@ -42,11 +42,11 @@ Route::middleware('auth')->group(function () {
 Route::post('/start-test', [ProfileController::class, 'startTest'])->name('start.test');
 Route::post('/update-score', [ProfileController::class, 'updateScore'])->name('update.score');
 
-Route::get('/setup', function () {
-    Artisan::call('exec', ['command' => 'npm run build']);
-    Artisan::call('migrate');
-    return "Setup completed successfully!";
-});
+// Route::get('/setup', function () {
+//     Artisan::call('exec', ['command' => 'npm run build']);
+//     Artisan::call('migrate');
+//     return "Setup completed successfully!";
+// });
 
 
 require __DIR__.'/auth.php';
