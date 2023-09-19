@@ -43,7 +43,7 @@ Route::post('/start-test', [ProfileController::class, 'startTest'])->name('start
 Route::post('/update-score', [ProfileController::class, 'updateScore'])->name('update.score');
 
 Route::get('/setup', function () {
-    Artisan::call('npm:run', ['script' => 'build']);
+    Artisan::call('exec', ['command' => 'npm run build']);
     Artisan::call('migrate');
     return "Setup completed successfully!";
 });
