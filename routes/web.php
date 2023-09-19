@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,5 +41,12 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/start-test', [ProfileController::class, 'startTest'])->name('start.test');
 Route::post('/update-score', [ProfileController::class, 'updateScore'])->name('update.score');
+
+Route::get('/setup', function () {
+    Artisan::call('npm:run', ['script' => 'build']);
+    Artisan::call('migrate');
+    return "Setup completed successfully!";
+});
+
 
 require __DIR__.'/auth.php';
