@@ -34,11 +34,11 @@ class CreateFilamentUser extends Command
         // Perform user creation logic here
 
         // Call the make:filament-user command with the provided details
-        // Artisan::call('make:filament-user', [
-        //     'Name' => $name,
-        //     'email' => $email,
-        //     'password' => $password,
-        // ]);
+        Artisan::call('make:filament-user', [
+            'Name' => $name,
+            'email' => $email,
+            'password' => $password,
+        ]);
 
         $this->info('Filament user created successfully.');
     }

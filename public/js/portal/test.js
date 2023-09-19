@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const duration = 0.5 * 60; // 30 minutes in seconds
+        
+    // const duration = 0.1 * 60; // 30 minutes in seconds
+    const duration = assessment[0].duration *60;
     let timer = duration;
     let timerInterval;
 
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (timer === 0) {
                 clearInterval(timerInterval);
-                submit();
+                submit('Time is up!!!');
             } else {
                 timer--;
             }
@@ -24,21 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function stopTimer() {
         clearInterval(timerInterval);
     }
-    
-    // const questionBank = [];
-    // Fetch questions from Laravel API
-    fetch('/api/questions')
-        .then(response => response.json())
-        .then(data => {
-            // Use data (array of questions) in your application
-            const questionBank_v2 = data;
-            // ...
-            // Rest of your code here
-            // ...
-        })
-        .catch(error => console.error('Error:', error));
-    
-        const questionBank = 
+     
+        const questionBanks = 
     [ 
         {
             section: 'A',
@@ -82,9 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
     ];
+
     let currentQuestionIndex = 0;
     let score = 0;
-    let qNum = 1;
+    let num = 1;
     const selectedAnswers = new Map();
 
     const questionContainer = document.getElementById('question-container');
@@ -93,19 +83,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
+    const qheaderContent = document.getElementById('qheader-content');
     const scoreContainer = document.getElementById('score-container');
+    const percentageElement = document.getElementById('pecentage');
     const scoreElement = document.getElementById('score');
     const qnumElement = document.getElementById('question-number');
     const instructions = document.getElementById('instructions');
-
-    function loadQuestion(index) {
+    
+    function loadQuestion(index, qNum=num) {
         questionContainer.style.display = 'block';
         qnumElement.textContent = 'Question: ' + qNum + '/' + questionBank.length;
         const question = questionBank[index];
-        questionContent.textContent = question.content;
+    
+        const content = question.content;
+        const answeroptions = question.answeroptions.split(',').map(option => option.trim());
+    
+        questionContent.textContent = content;
     
         optionsContainer.innerHTML = '';
-        question.answeroptions.forEach((answer, idx) => {
+        answeroptions.forEach((answer, idx) => {
             const option = document.createElement('div');
             option.classList.add('option');
     
@@ -135,14 +131,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedAnswers.set(index, this.value);
             });
         });
+    
         showPrevNextButton();
-    }    
+    }
+    
 
     function nextQuestion() {
         currentQuestionIndex++;
+        num = currentQuestionIndex+1;
         if (currentQuestionIndex < questionBank.length) {
-            loadQuestion(currentQuestionIndex);
-            qNum++;
+            loadQuestion(currentQuestionIndex, num);
         } else {
             toggleSubmitButton(); // Show submit button after last question
         }
@@ -151,8 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function prevQuestion() {
         if (currentQuestionIndex > 0) {
             currentQuestionIndex--;
-            qNum--;
-            loadQuestion(currentQuestionIndex);
+            num = currentQuestionIndex+1;
+            loadQuestion(currentQuestionIndex, num);
             toggleSubmitButton();
         }
     }
@@ -182,33 +180,53 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show submit button after last question
             const submitBtn = document.getElementById('next-btn');
             submitBtn.textContent = 'Submit';
-            submitBtn.addEventListener('click', submit);
+            submitBtn.addEventListener('click', submit());
         }
     }
    
-    function submit() {
+    function submit(msg ='') {
+        stopTimer();
         score = 0; // Reset score before recalculating
-    
         questionBank.forEach((question, index) => {
-            if (selectedAnswers.has(index) && selectedAnswers.get(index) === question.answer) {
-                score++;
+            const selectedAnswer = selectedAnswers.get(index);
+    
+            if (question.type === 'true_false') {
+                // For true/false questions, the answer is already a string
+                if (selectedAnswer && selectedAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase()) {
+                    score++;
+                }
+            } else {
+                // For multiple choice questions, convert answeroptions to an array
+                const answerOptions = question.answeroptions.split(',').map(option => option.trim());
+    
+                if (selectedAnswer && selectedAnswer.trim() === question.answer.trim()) {
+                    score++;
+                }
             }
         });
     
-        showScore();
+        showScore(msg);
     }
+    
 
-    function showScore() {
+    function showScore(msg) {
         questionContent.style.display = 'none';
         optionsContainer.style.display = 'none';
         prevBtn.style.display = 'none';
         nextBtn.style.display = 'none';
         submitBtn.style.display = 'none';
+        qheaderContent.style.display = 'none';
         scoreContainer.style.display = 'block';
-
-        scoreElement.textContent = score + '/' + questionBank.length;
+        
+        percentageElement.textContent = ' '+percentScore() + '%';  
+        scoreElement.innerHTML = `${msg} <br>You got <strong>${score}</strong> correct answer(s) out of <strong>${questionBank.length}</strong> questions`;
     }
     
+    function percentScore(){
+        const percentageCorrect = Math.round((score / questionBank.length) * 100);
+        updateScore(percentageCorrect);
+        return percentageCorrect;
+    }
 
     prevBtn.addEventListener('click', prevQuestion);
     nextBtn.addEventListener('click', nextQuestion);
@@ -221,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function justBeforeLoadQuestion(){
         instructions.style.display = 'none';
+        //Register this event such that the user cannot redo the test or reload the page
     }
 
     document.getElementById('start-btn').addEventListener('click', function() {
@@ -233,4 +252,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerElement = document.createElement('div');
     timerElement.id = 'timer';
     document.querySelector('.question-container').appendChild(timerElement);
+
+    function updateScore(score) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+        fetch('/update-score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ score: score }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+        })
+        .catch(error => {
+            console.error('Error updating score:', error);
+        });
+    }
+    
+});
+
+
+document.getElementById('startTestForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting normally
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/start-test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({}),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Status updated successfully');
+    })
+    .catch(error => {
+        console.error('Error updating status:', error);
+    });
 });
