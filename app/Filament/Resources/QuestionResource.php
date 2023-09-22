@@ -72,7 +72,7 @@ class QuestionResource extends Resource
                         Forms\Components\TextInput::make('duration')
                             ->label('assessment duration ')
                             ->required(),
-                        Forms\Components\TextInput::make('user_id') //change to Hidden::make('user_id')
+                        Forms\Components\Hidden::make('user_id') //change to Hidden::make('user_id')
                             ->default(Auth::user()->id)
                     ])
                     ->required(),
@@ -87,7 +87,8 @@ class QuestionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('content'),
-                Tables\Columns\TextColumn::make('assessment.description')
+                Tables\Columns\TextColumn::make('assessment.id')
+                ->label('Assessment ID')
                 ->toggleable()
                 ->wrap(),
                 Tables\Columns\TextColumn::make('type')

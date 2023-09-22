@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('PEVA Test Portal') }}
+            {{ config('app.name','PEVA Test Portal') }}
         </h2>
     </x-slot>
 
@@ -11,18 +11,6 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <!-- {{ __("User: ") }} -->
 
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Online Test</title>
-                        <link rel="stylesheet" href="{{ asset('css/portal/styles.css') }}">
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-                        
-                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-                        <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-                    </head>
-
-                    <body>
                     @if (isset($assessmentDone))
                         Hi {{Auth::user()->name}}, you scored <strong>{{Auth::user()->score}}%</strong> in your last assessement!
                         <p>Contact an admin to do another test!!</p>

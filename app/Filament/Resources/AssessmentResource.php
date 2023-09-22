@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssessmentResource\Pages;
 use App\Filament\Resources\AssessmentResource\RelationManagers;
+use App\Filament\Resources\AssessmentResource\RelationManagers\QuestionRelationManager;
 use App\Models\Assessment;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -12,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentResource extends Resource
 {
@@ -23,9 +25,9 @@ class AssessmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Hidden::make('user_id')
+                    ->default(Auth::user()->id)    
+                    ->required(),
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->maxLength(255),
@@ -50,6 +52,10 @@ class AssessmentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('duration')
                     ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('question_count')->counts('question')
+                    ->numeric()
+                    ->label('Question')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -80,7 +86,7 @@ class AssessmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            QuestionRelationManager::class,
         ];
     }
     
